@@ -175,16 +175,25 @@ class Group (Element):
         self._children.append (item)
 
 class Drawing (Group):
-    def __init__(self, width, height):
+    def __init__(self, width, height, margin = 4):
+        '''Create a new drawing.
+
+        Margin sets a margin around the drawing and thus increases the actual
+        size. This is useful if a rectangle is drawn around the whole image;
+        without the margin, parts of the line might be cut off.'''
         super(Drawing, self).__init__ ()
         self._width = width
         self._height = height
+        self._margin = margin
 
     def GetWidth (self):
         return self._width
 
     def GetHeight (self):
         return self._height
+
+    def GetMargin (self):
+        return self._margin
 
     def SaveSvg (self, filename):
         v = SvgVisitor (filename)
@@ -307,11 +316,12 @@ class SvgVisitor (Visitor):
 
     def Save (self, image):
         d = svgwrite.Drawing (self._filename,
-            size = (image.GetWidth (), image.GetHeight ()),
+            size = (image.GetWidth () + image.GetMargin () * 2,
+                    image.GetHeight () + image.GetMargin () * 2),
             profile = 'full')
 
         rootItem = self.VisitGeneric (image, d)
-
+        rootItem.translate (image.GetMargin (), image.GetMargin ())
         if rootItem is not None:
             d.add (rootItem)
 
