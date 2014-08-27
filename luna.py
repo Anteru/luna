@@ -266,8 +266,8 @@ class Drawing (Element):
         return self._margin
 
     def SaveSvg (self, filename):
-        v = SvgVisitor (filename)
-        v.Save (self)
+        v = SvgVisitor ()
+        v.Save (filename, self)
 
     def AddShared (self, item):
         '''Add a new, shared element.
@@ -319,8 +319,8 @@ class Visitor:
         pass
 
 class SvgVisitor (Visitor):
-    def __init__ (self, filename):
-        self._filename = filename
+    def __init__ (self):
+        super(SvgVisitor,self).__init__ ()
 
     def _UpdateCommonAttributes (self, svgItem, element):
         if element.IsReferenced ():
@@ -405,8 +405,8 @@ class SvgVisitor (Visitor):
         return ctx.use ('#' + instance.GetSource().GetId (),
             insert=instance.GetPosition ())
 
-    def Save (self, image):
-        d = svgwrite.Drawing (self._filename,
+    def Save (self, filename, image):
+        d = svgwrite.Drawing (filename,
             size = (image.GetWidth () + image.GetMargin () * 2,
                     image.GetHeight () + image.GetMargin () * 2),
             profile = 'full')
