@@ -60,12 +60,37 @@ class Fill:
         return self._color
 
 class Element:
-    def __init__(self):
+    def __init__(self, identifier=None):
         self._scale = (1, 1)
         self._children = []
+        self._shared = []
+        if identifier is None:
+            self._id = self.__class__.__name__ + '|' + str(id(self))
+            self._references = 0
+        else:
+            self._id = identifier
+            # We assume this element is referenced from the "outside", as the
+            # user has specified a name for it
+            self._references = 1
+
+    def GetId (self):
+        return self._id
+
+    def _AddReference (self):
+        self._references += 1
+
+    def IsReferenced (self):
+        return self._references > 0
 
     def GetChildren (self):
         return self._children
+
+    def GetShared (self):
+        '''Get the shared elements referenced by this element.
+
+        An element may instantiate an object multiple times to reduce the amount
+        of processing.'''
+        return self._shared
 
     def GetScale (self):
         return self._scale
@@ -128,6 +153,19 @@ class Rectangle (Element):
     def GetFill (self):
         return self._fill
 
+class Instance (Element):
+    def __init__ (self, source, position):
+        super (Instance, self).__init__ ()
+        source._AddReference ()
+        self._source = source
+        self._position = position
+
+    def GetSource (self):
+        return self._source
+
+    def GetPosition (self):
+        return self._position
+
 class Group (Element):
     def __init__(self, name=None):
         super(Group, self).__init__ ()
@@ -152,19 +190,30 @@ class Drawing (Group):
         v = SvgVisitor (filename)
         v.Save (self)
 
+    def AddShared (self, item):
+        '''Add a new, shared element.
+
+        This element will be invisible by default. To place it in the drawing,
+        use an Instance which references this object.'''
+        self._shared.append (item)
+
 class Grid (Group):
     def __init__ (self, offset, size, spacing, stroke=Stroke ()):
         super(Grid, self).__init__ ()
-        for y in range (size [1] + 1):
-            ly = y * spacing + offset [1]
-            self.Add (Line ((offset [0], ly),
-                            (offset [0] + size [0] * spacing, ly),
-                            stroke=stroke))
-        for x in range (size [0] + 1):
-            lx = x * spacing + offset [0]
-            self.Add (Line ((lx, offset [1]),
-                            (lx, offset [1] + size [1] * spacing),
-                            stroke=stroke))
+        horizontalLine = Line ((offset [0], offset [1]),
+                      (offset [0] + size [0] * spacing, offset [1]),
+                      stroke=stroke)
+        self._shared.append (horizontalLine)
+
+        for y in range (0, size [1] + 1):
+            self.Add (Instance (horizontalLine, (0, y * spacing)))
+
+        verticalLine = Line ((offset [0], offset [1]),
+                             (offset [0], offset [1] + size [1] * spacing),
+                             stroke=stroke)
+        self._shared.append (verticalLine)
+        for x in range (0, size [0] + 1):
+            self.Add (Instance (verticalLine, (x * spacing, 0)))
 
 class Cross (Group):
     def __init__ (self, position, size=1, stroke=Stroke()):
@@ -193,7 +242,24 @@ class SvgVisitor (Visitor):
     def __init__ (self, filename):
         self._filename = filename
 
+    def _UpdateCommonAttributes (self, svgItem, element):
+        if element.IsReferenced ():
+            svgItem ['id'] = element.GetId ()
+
+        if (element.GetScale ()[0] != 1 or element.GetScale ()[1] != 1):
+            svgItem.scale (e.GetScale ())
+
     def VisitElement (self, element, ctx = None):
+        for s in element.GetShared ():
+            svgItem = self.VisitGeneric (s, ctx)
+
+            if svgItem is None:
+                continue
+
+            self._UpdateCommonAttributes (svgItem, s)
+
+            ctx.defs.add (svgItem)
+
         c = element.GetChildren ()
         if len (c) == 0:
             return None
@@ -205,8 +271,7 @@ class SvgVisitor (Visitor):
                 if svgItem is None:
                     continue
 
-                if (e.GetScale ()[0] != 1 or e.GetScale ()[1] != 1):
-                    svgItem.scale (e.GetScale ())
+                self._UpdateCommonAttributes (svgItem, e)
 
                 g.add (svgItem)
 
@@ -236,6 +301,10 @@ class SvgVisitor (Visitor):
             rectangle.GetSize (),
             **p)
 
+    def VisitInstance (self, instance, ctx=None):
+        return ctx.use ('#' + instance.GetSource().GetId (),
+            insert=instance.GetPosition ())
+
     def Save (self, image):
         d = svgwrite.Drawing (self._filename,
             size = (image.GetWidth (), image.GetHeight ()),
@@ -250,7 +319,7 @@ class SvgVisitor (Visitor):
 
     def _SvgStroke (self, stroke):
         if stroke is None:
-            return {'stroke' : 'none'}
+            return {'stroke':'none'}
         else:
             return {'stroke':self._SvgColor (stroke.GetColor ()),
                     'stroke_width' : stroke.GetWidth (),
