@@ -210,14 +210,18 @@ class Instance (Element):
         return self._position
 
 class Group (Element):
-    def __init__(self, name=None):
+    def __init__(self, translation=(0, 0), name=None):
         super(Group, self).__init__ ()
         self._name = name
+        self._translation = translation
 
     def Add (self, item):
         self._children.append (item)
 
-class Drawing (Group):
+    def GetTranslation (self):
+        return self._translation
+
+class Drawing (Element):
     def __init__(self, width, height, margin = 4):
         '''Create a new drawing.
 
@@ -228,6 +232,9 @@ class Drawing (Group):
         self._width = width
         self._height = height
         self._margin = margin
+
+    def Add (self, item):
+        self._children.append (item)
 
     def GetWidth (self):
         return self._width
@@ -302,7 +309,7 @@ class SvgVisitor (Visitor):
         if (element.GetScale ()[0] != 1 or element.GetScale ()[1] != 1):
             svgItem.scale (e.GetScale ())
 
-    def VisitElement (self, element, ctx = None):
+    def _VisitCompoundElement (self, element, ctx=None):
         for s in element.GetShared ():
             svgItem = self.VisitGeneric (s, ctx)
 
@@ -329,6 +336,17 @@ class SvgVisitor (Visitor):
                 g.add (svgItem)
 
             return g
+
+    def VisitElement (self, element, ctx=None):
+        return self._VisitCompoundElement (element, ctx)
+
+    def VisitGroup (self, group, ctx=None):
+        g = self._VisitCompoundElement (group, ctx)
+
+        if group.GetTranslation () [0] != 0 or group.GetTranslation () [1] != 0:
+            g.translate (group.GetTranslation () [0],
+                         group.GetTranslation () [1])
+        return g
 
     def VisitLine (self, line, ctx = None):
         p = dict ()
