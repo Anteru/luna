@@ -248,6 +248,7 @@ class Drawing (Group):
         This element will be invisible by default. To place it in the drawing,
         use an Instance which references this object.'''
         self._shared.append (item)
+        return item
 
 class Grid (Group):
     def __init__ (self, offset, size, spacing, stroke=Stroke ()):
