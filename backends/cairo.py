@@ -3,7 +3,6 @@ from .. import Visitor, LineJoin, LineCap
 
 class CairoVisitor (Visitor):
 	def __init__ (self):
-		import cairocffi as cairo
 		super(CairoVisitor,self).__init__ ()
 
 	def _VisitCompoundElement (self, element, ctx=None):
@@ -29,13 +28,18 @@ class CairoVisitor (Visitor):
 						-group.GetTranslation () [1])
 
 	def VisitLine (self, line, ctx = None):
-		ctx.new_path ()
+		if line.GetStroke () is None:
+			return
+
 		self._ApplyStroke (line.GetStroke (), ctx)
 		ctx.move_to (line.GetStart () [0], line.GetStart () [1])
 		ctx.line_to (line.GetEnd () [0], line.GetEnd () [1])
 		ctx.stroke ()
 
 	def VisitPolygon (self, polygon, ctx = None):
+		if polygon.GetFill () is None and polygon.GetStroke () is None:
+			return
+
 		points = polygon.GetPoints ()
 
 		if len(points) <= 1:
@@ -52,10 +56,14 @@ class CairoVisitor (Visitor):
 
 		if polygon.GetStroke () is not None:
 			self._ApplyStroke (polygon.GetStroke (), ctx)
-			ctx.stroke ()
+			ctx.stroke_preserve ()
+
 		ctx.new_path ()
 
 	def VisitRectangle (self, rectangle, ctx=None):
+		if rectangle.GetFill () is None and rectangle.GetStroke () is None:
+			return
+
 		ctx.rectangle (rectangle.GetPosition () [0], rectangle.GetPosition () [1],
 			rectangle.GetSize () [0], rectangle.GetSize () [0])
 
@@ -65,11 +73,14 @@ class CairoVisitor (Visitor):
 
 		if rectangle.GetStroke () is not None:
 			self._ApplyStroke (rectangle.GetStroke (), ctx)
-			ctx.stroke ()
+			ctx.stroke_preserve ()
 
 		ctx.new_path ()
 
 	def VisitCircle (self, circle, ctx=None):
+		if circle.GetFill () is None and circle.GetStroke () is None:
+			return
+
 		import math
 
 		ctx.arc (circle.GetCenter () [0], circle.GetCenter () [1],
@@ -81,7 +92,7 @@ class CairoVisitor (Visitor):
 
 		if circle.GetStroke () is not None:
 			self._ApplyStroke (circle.GetStroke (), ctx)
-			ctx.stroke ()
+			ctx.stroke_preserve ()
 
 		ctx.new_path ()
 
@@ -113,23 +124,21 @@ class CairoVisitor (Visitor):
 		self._Render (image, surface)
 
 	def _ApplyStroke (self, stroke, ctx):
-		if stroke is not None:
-			ctx.set_line_width (stroke.GetWidth ())
-			ctx.set_line_join (self._CairoLineJoin (stroke.GetLineJoin ()))
-			ctx.set_line_cap (self._CairoLineCap (stroke.GetLineCap ()))
-			ctx.set_source_rgba (
-				stroke.GetColor ().R () / 255,
-				stroke.GetColor ().G () / 255,
-				stroke.GetColor ().B () / 255,
-				stroke.GetOpacity ())
+		ctx.set_line_width (stroke.GetWidth ())
+		ctx.set_line_join (self._CairoLineJoin (stroke.GetLineJoin ()))
+		ctx.set_line_cap (self._CairoLineCap (stroke.GetLineCap ()))
+		ctx.set_source_rgba (
+			stroke.GetColor ().R () / 255,
+			stroke.GetColor ().G () / 255,
+			stroke.GetColor ().B () / 255,
+			stroke.GetOpacity ())
 
 	def _ApplyFill (self, fill, ctx):
-		if fill is not None:
-			ctx.set_source_rgba (
-				fill.GetColor ().R () / 255,
-				fill.GetColor ().G () / 255,
-				fill.GetColor ().B () / 255,
-				fill.GetOpacity ())
+		ctx.set_source_rgba (
+			fill.GetColor ().R () / 255,
+			fill.GetColor ().G () / 255,
+			fill.GetColor ().B () / 255,
+			fill.GetOpacity ())
 
 	def _CairoLineJoin (self, lineJoin):
 		m = {

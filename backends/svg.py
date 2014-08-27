@@ -13,28 +13,20 @@ class SvgVisitor (Visitor):
 			svgItem.scale (e.GetScale ())
 
 	def _VisitCompoundElement (self, element, ctx=None):
-		for s in element.GetShared ():
-			svgItem = self.VisitGeneric (s, ctx)
-
-			if svgItem is None:
-				continue
-
-			self._UpdateCommonAttributes (svgItem, s)
+		for sharedElement in element.GetShared ():
+			svgItem = self.VisitGeneric (sharedElement, ctx)
+			self._UpdateCommonAttributes (svgItem, sharedElement)
 
 			ctx.defs.add (svgItem)
 
-		c = element.GetChildren ()
-		if len (c) == 0:
+		children = element.GetChildren ()
+		if len (children) == 0:
 			return None
 		else:
 			g = ctx.g ()
-			for e in c:
-				svgItem = self.VisitGeneric (e, ctx)
-
-				if svgItem is None:
-					continue
-
-				self._UpdateCommonAttributes (svgItem, e)
+			for childElement in children:
+				svgItem = self.VisitGeneric (childElement, ctx)
+				self._UpdateCommonAttributes (svgItem, childElement)
 
 				g.add (svgItem)
 
