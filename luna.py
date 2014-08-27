@@ -13,6 +13,23 @@ class LineJoin(Enum):
     Round = 1
     Bevel = 2
 
+@unique
+class DashPattern (Enum):
+    Dash = 0
+    Dot = 1
+    SparseDash = 2
+    DashDot = 3
+
+def _DashPatternToArray (p):
+    m = {
+        DashPattern.Dash: [5, 5],
+        DashPattern.Dot: [1, 5],
+        DashPattern.SparseDash: [5, 10],
+        DashPattern.DashDot: [15, 10, 5, 10]
+    }
+
+    return m [p]
+
 class Color:
     def __init__ (self, r, g = None, b = None):
         if g is None and b is None:
@@ -34,11 +51,22 @@ class Color:
         return self._b
 
 class Stroke:
-    def __init__ (self, color=Color(0), width=1, linecap=LineCap.Round, linejoin=LineJoin.Round):
+    def __init__ (self, color=Color(0), width=1, linecap=LineCap.Round,
+        linejoin=LineJoin.Round, dashPattern=None):
+        '''Specify a stroke style.
+
+        A stroke style is used for stroking lines.
+
+        dashPattern must be an array of numbers or alternatively a known pattern.'''
         self._color = color
         self._width = width
         self._linecap = linecap
         self._linejoin = linejoin
+
+        if isinstance (dashPattern, DashPattern):
+            self._dashPattern = _DashPatternToArray (dashPattern)
+        else:
+            self._dashPattern = dashPattern
 
     def GetWidth (self):
         return self._width
@@ -51,6 +79,12 @@ class Stroke:
 
     def GetLineJoin (self):
         return self._linejoin
+
+    def GetDashPattern (self):
+        return self._dashPattern
+
+    def GetDashOffset (self):
+        return 0
 
 class Fill:
     def __init__ (self, color=Color (0)):
@@ -331,11 +365,16 @@ class SvgVisitor (Visitor):
         if stroke is None:
             return {'stroke':'none'}
         else:
-            return {'stroke':self._SvgColor (stroke.GetColor ()),
+            result = {'stroke':self._SvgColor (stroke.GetColor ()),
                     'stroke_width' : stroke.GetWidth (),
                     'stroke_linejoin' : self._SvgLineJoin (stroke.GetLineJoin ()),
                     'stroke_linecap' : self._SvgLineCap (stroke.GetLineCap ())
                     }
+
+            if stroke.GetDashPattern () is not None:
+                result ['stroke-dasharray'] = ','.join (map (str, stroke.GetDashPattern ()))
+
+            return result
 
     def _SvgFill (self, fill):
         if fill is None:
