@@ -142,3 +142,5 @@ if __name__=='__main__':
             d.Add (c)
 
     d.SaveSvg ('marching-cubes.svg')
+    d.SavePng ('marching-cubes.png')
+    d.SavePdf ('marching-cubes.pdf')
