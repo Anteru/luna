@@ -52,7 +52,7 @@ class Color:
 
 class Stroke:
     def __init__ (self, color=Color(0), width=1, linecap=LineCap.Round,
-        linejoin=LineJoin.Round, dashPattern=None):
+        linejoin=LineJoin.Round, dashPattern=None,opacity=1):
         '''Specify a stroke style.
 
         A stroke style is used for stroking lines.
@@ -62,6 +62,8 @@ class Stroke:
         self._width = width
         self._linecap = linecap
         self._linejoin = linejoin
+
+        self._opacity = opacity
 
         if isinstance (dashPattern, DashPattern):
             self._dashPattern = _DashPatternToArray (dashPattern)
@@ -86,12 +88,19 @@ class Stroke:
     def GetDashOffset (self):
         return 0
 
+    def GetOpacity (self):
+        return self._opacity
+
 class Fill:
-    def __init__ (self, color=Color (0)):
+    def __init__ (self, color=Color (0), opacity=1):
         self._color = color
+        self._opacity = opacity
 
     def GetColor (self):
         return self._color
+
+    def GetOpacity (self):
+        return self._opacity
 
 class Element:
     def __init__(self, identifier=None):
@@ -330,7 +339,7 @@ class SvgVisitor (Visitor):
     def VisitPolygon (self, polygon, ctx = None):
         p = dict ()
         p.update (self._SvgStroke (polygon.GetStroke ()))
-        p ['fill'] = self._SvgFill (polygon.GetFill ())
+        p.update (self._SvgFill (polygon.GetFill ()))
 
         return ctx.polygon (polygon.GetPoints (),
             **p)
@@ -338,7 +347,7 @@ class SvgVisitor (Visitor):
     def VisitRectangle (self, rectangle, ctx=None):
         p = dict ()
         p.update (self._SvgStroke (rectangle.GetStroke ()))
-        p ['fill'] = self._SvgFill (rectangle.GetFill ())
+        p.update (self._SvgFill (rectangle.GetFill ()))
 
         return ctx.rect (rectangle.GetPosition (),
             rectangle.GetSize (),
@@ -363,24 +372,34 @@ class SvgVisitor (Visitor):
 
     def _SvgStroke (self, stroke):
         if stroke is None:
-            return {'stroke':'none'}
+            return {'stroke' : 'none'}
         else:
-            result = {'stroke':self._SvgColor (stroke.GetColor ()),
-                    'stroke_width' : stroke.GetWidth (),
-                    'stroke_linejoin' : self._SvgLineJoin (stroke.GetLineJoin ()),
-                    'stroke_linecap' : self._SvgLineCap (stroke.GetLineCap ())
+            result = {'stroke'          : self._SvgColor (stroke.GetColor ()),
+                    'stroke_width'      : stroke.GetWidth (),
+                    'stroke_linejoin'   : self._SvgLineJoin (stroke.GetLineJoin ()),
+                    'stroke_linecap'    : self._SvgLineCap (stroke.GetLineCap ())
                     }
 
             if stroke.GetDashPattern () is not None:
                 result ['stroke-dasharray'] = ','.join (map (str, stroke.GetDashPattern ()))
 
+            if stroke.GetOpacity () != 1:
+                result ['stroke_opacity'] = stroke.GetOpacity ()
+
             return result
 
     def _SvgFill (self, fill):
         if fill is None:
-            return 'none'
+            return {'fill' :'none'}
         else:
-            return self._SvgColor (fill.GetColor ())
+            result = {
+                'fill' : self._SvgColor (fill.GetColor ())
+            }
+
+            if fill.GetOpacity () != 1:
+                result ['fill_opacity'] = fill.GetOpacity ()
+
+            return result
 
     def _SvgColor (self, color):
         return svgwrite.rgb (color.R (), color.G (), color.B ())
