@@ -1,7 +1,7 @@
 Luna
 ====
 
-**Luna** is a tiny vector-based drawing library. It currently uses ``svgwrite`` to produce SVG output.
+**Luna** is a tiny vector-based drawing library. It currently uses ``svgwrite`` to produce SVG output and Cairo for PNG and PDF.
 
 License
 -------
@@ -11,11 +11,11 @@ License
 Installation
 ------------
 
-Install ``svgwrite`` using PIP:
+Install ``svgwrite`` and ``cairocffi`` using PIP:
 
-    pip install svgwrite
+    pip install svgwrite cairocffi
 
-You can now use **Luna** by using ``import luna``. There are no further dependencies for **Luna**.
+You can now use **Luna** by using ``import luna``. There are no further dependencies for **Luna**. The examples require ``numpy``.
 
 General usage
 -------------
