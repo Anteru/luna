@@ -108,7 +108,7 @@ class Element:
         self._children = []
         self._shared = []
         if identifier is None:
-            self._id = self.__class__.__name__ + '|' + str(id(self))
+            self._id = self.__class__.__name__ + '_' + str(id(self))
             self._references = 0
         else:
             self._id = identifier
