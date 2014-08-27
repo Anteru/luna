@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from luna import *
 import numpy as np
 import random
@@ -126,10 +128,10 @@ if __name__=='__main__':
     for y in range(3):
         for x in range (5):
             c = Group (translation=(x * (cubeSize + perspectiveShift + spacing),
-                                    y * (cubeSize + perspectiveShift + spacing) + perspectiveShift))
+                                    y * (cubeSize + perspectiveShift + spacing) - sy))
 
             idx = y * 5 + x
-            c.Add (cube)
+            c.Add (Instance (cube, (0, 0)))
 
             for p in interiorPoints [idx]:
                 c.Add (Circle (vtx [p], radius=3, fill=Fill (Color (0xFF, 0x8, 0x8))))
