@@ -176,6 +176,26 @@ class Polygon (Element):
     def GetFill (self):
         return self._fill
 
+class Circle (Element):
+    def __init__ (self, center, radius=1, stroke=Stroke (), fill=Fill ()):
+        super (Circle, self).__init__ ()
+        self._center = center
+        self._radius = radius
+        self._stroke = stroke
+        self._fill = fill
+
+    def GetStroke (self):
+        return self._stroke
+
+    def GetRadius (self):
+        return self._radius
+
+    def GetCenter (self):
+        return self._center
+
+    def GetFill (self):
+        return self._fill
+
 class Rectangle (Element):
     def __init__ (self, position, size, stroke=Stroke (), fill=Fill ()):
         super (Rectangle, self).__init__ ()
@@ -370,6 +390,15 @@ class SvgVisitor (Visitor):
 
         return ctx.rect (rectangle.GetPosition (),
             rectangle.GetSize (),
+            **p)
+
+    def VisitCircle (self, circle, ctx=None):
+        p = dict ()
+        p.update (self._SvgStroke (circle.GetStroke ()))
+        p.update (self._SvgFill (circle.GetFill ()))
+
+        return ctx.circle (circle.GetCenter (),
+            circle.GetRadius (),
             **p)
 
     def VisitInstance (self, instance, ctx=None):
