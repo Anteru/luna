@@ -227,12 +227,13 @@ class Circle (Element):
         return bounds
 
 class Rectangle (Element):
-    def __init__ (self, position, size, stroke=Stroke (), fill=Fill ()):
+    def __init__ (self, position, size, cornerRadius=0, stroke=Stroke (), fill=Fill ()):
         super (Rectangle, self).__init__ ()
         self._position = geo.Vector2 (position)
         self._size = geo.Vector2 (size)
         self._stroke = stroke
         self._fill = fill
+        self._cornerRadius = cornerRadius
 
     def GetStroke (self):
         return self._stroke
@@ -242,6 +243,9 @@ class Rectangle (Element):
 
     def GetPosition (self):
         return self._position
+
+    def GetCornerRadius (self):
+        return self._cornerRadius
 
     def GetFill (self):
         return self._fill
@@ -316,7 +320,7 @@ class Drawing (Element):
         self._children.append (item)
 
     def GetSize (self):
-        size = None
+        size = geo.Vector2 (0, 0)
 
         if self._width is None or self._height is None:
             size = self.GetBounds ().GetSize ()
@@ -325,7 +329,7 @@ class Drawing (Element):
             size [0] = self._width
 
         if self._height is not None:
-            size [1] = self._size
+            size [1] = self._height
 
         return size
 

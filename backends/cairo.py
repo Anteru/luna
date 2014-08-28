@@ -61,11 +61,23 @@ class CairoVisitor (Visitor):
 		ctx.new_path ()
 
 	def VisitRectangle (self, rectangle, ctx=None):
+		import math
 		if rectangle.GetFill () is None and rectangle.GetStroke () is None:
 			return
 
-		ctx.rectangle (rectangle.GetPosition () [0], rectangle.GetPosition () [1],
-			rectangle.GetSize () [0], rectangle.GetSize () [0])
+		if rectangle.GetCornerRadius () == 0:
+			ctx.rectangle (rectangle.GetPosition () [0], rectangle.GetPosition () [1],
+				rectangle.GetSize ().x, rectangle.GetSize ().y)
+		else:
+			p = rectangle.GetPosition ()
+			s = rectangle.GetSize ()
+			r = rectangle.GetCornerRadius ()
+			# http://cairographics.org/samples/rounded_rectangle/
+			ctx.arc (p.x + s.x - r, p.y + r, r, math.radians (-90), math.radians (0))
+			ctx.arc (p.x + s.x - r, p.y + s.y - r, r, math.radians (0), math.radians (90))
+			ctx.arc (p.x + r, p.y + s.y - r, r, math.radians (90), math.radians (180))
+			ctx.arc (p.x + r, p.y + r, r, math.radians (180), math.radians (270))
+			ctx.close_path ()
 
 		if rectangle.GetFill () is not None:
 			self._ApplyFill (rectangle.GetFill (), ctx)

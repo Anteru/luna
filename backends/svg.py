@@ -63,6 +63,10 @@ class SvgVisitor (Visitor):
 		p.update (self._SvgStroke (rectangle.GetStroke ()))
 		p.update (self._SvgFill (rectangle.GetFill ()))
 
+		if rectangle.GetCornerRadius () != 0:
+			p ['rx'] = rectangle.GetCornerRadius ()
+			p ['ry'] = rectangle.GetCornerRadius ()
+
 		return ctx.rect (rectangle.GetPosition (),
 			rectangle.GetSize (),
 			**p)
