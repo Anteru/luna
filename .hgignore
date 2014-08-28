@@ -1,0 +1,4 @@
+syntax: regexp
+^py.*
+syntax: glob
+**/__pycache__
