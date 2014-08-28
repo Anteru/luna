@@ -129,6 +129,12 @@ class CairoVisitor (Visitor):
 		ctx.set_line_width (stroke.GetWidth ())
 		ctx.set_line_join (self._CairoLineJoin (stroke.GetLineJoin ()))
 		ctx.set_line_cap (self._CairoLineCap (stroke.GetLineCap ()))
+
+		if stroke.GetDashPattern () is not None:
+			ctx.set_dash (stroke.GetDashPattern ())
+		else:
+			ctx.set_dash ([])
+			
 		ctx.set_source_rgba (
 			stroke.GetColor ().R () / 255,
 			stroke.GetColor ().G () / 255,
