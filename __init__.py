@@ -1,5 +1,7 @@
 from enum import Enum, unique
 
+from . import geo
+
 @unique
 class LineCap(Enum):
     Round   = 0
@@ -115,6 +117,14 @@ class Element:
             # user has specified a name for it
             self._references = 1
 
+    def GetBounds (self):
+        bounds = geo.BoundingBox ()
+
+        for element in self._children:
+            bounds.Merge (element.GetBounds ())
+
+        return bounds
+
     def GetId (self):
         return self._id
 
@@ -139,15 +149,15 @@ class Element:
 
     def Scale (self, x, y = None):
         if y is None:
-            self._scale = (x, x)
+            self._scale = geo.Vector2 (x, x)
         else:
-            self._scale = (x, y)
+            self._scale = geo.Vector2 (x, y)
 
 class Line (Element):
     def __init__ (self, p0, p1, stroke=Stroke ()):
         super (Line, self).__init__ ()
-        self._p0 = p0
-        self._p1 = p1
+        self._p0 = geo.Vector2 (p0)
+        self._p1 = geo.Vector2 (p1)
         self._stroke = stroke
 
     def GetStart (self):
@@ -159,10 +169,15 @@ class Line (Element):
     def GetStroke (self):
         return self._stroke
 
+    def GetBounds (self):
+        bounds = geo.BoundingBox.FromPoints ([self._p0, self._p1])
+        bounds.Expand (0.5 * self._stroke.GetWidth ())
+        return bounds
+
 class Polygon (Element):
     def __init__ (self, points, stroke=Stroke (), fill=Fill ()):
         super(Polygon, self).__init__ ()
-        self._points = points
+        self._points = [geo.Vector2 (p) for p in points]
         self._stroke = stroke
         self._fill = fill
 
@@ -175,10 +190,17 @@ class Polygon (Element):
     def GetFill (self):
         return self._fill
 
+    def GetBounds (self):
+        bounds = geo.BoundingBox.FromPoints (self._points)
+
+        if self._stroke is not None:
+            bounds.Expand (0.5 * self._stroke.GetWidth ())
+        return bounds
+
 class Circle (Element):
     def __init__ (self, center, radius=1, stroke=Stroke (), fill=Fill ()):
         super (Circle, self).__init__ ()
-        self._center = center
+        self._center = geo.Vector2 (center)
         self._radius = radius
         self._stroke = stroke
         self._fill = fill
@@ -195,11 +217,20 @@ class Circle (Element):
     def GetFill (self):
         return self._fill
 
+    def GetBounds (self):
+        bounds = geo.BoundingBox ()
+        bounds.Merge ((self._center.x - self._radius, self._center.y - self._radius))
+        bounds.Merge ((self._center.x + self._radius, self._center.y + self._radius))
+
+        if self._stroke is not None:
+            bounds.Expand (0.5 * self._stroke.GetWidth ())
+        return bounds
+
 class Rectangle (Element):
     def __init__ (self, position, size, stroke=Stroke (), fill=Fill ()):
         super (Rectangle, self).__init__ ()
-        self._position = position
-        self._size = size
+        self._position = geo.Vector2 (position)
+        self._size = geo.Vector2 (size)
         self._stroke = stroke
         self._fill = fill
 
@@ -215,18 +246,35 @@ class Rectangle (Element):
     def GetFill (self):
         return self._fill
 
+    def GetBounds (self):
+        bounds = geo.BoundingBox.FromPoints (
+            [self._position, self._position + self._size]
+        )
+
+        if self._stroke is not None:
+            bounds.Expand (0.5 * self._stroke.GetWidth ())
+        return bounds
+
 class Instance (Element):
     def __init__ (self, source, position):
         super (Instance, self).__init__ ()
         source._AddReference ()
         self._source = source
-        self._position = position
+        self._position = geo.Vector2 (position)
 
     def GetSource (self):
         return self._source
 
     def GetPosition (self):
         return self._position
+
+    def GetBounds (self):
+        b = self._source.GetBounds ()
+
+        return geo.BoundingBox (
+            b.GetMinimum () + self._position,
+            b.GetMaximum () + self._position
+        )
 
 class Group (Element):
     def __init__(self, translation=(0, 0), name=None):
@@ -240,9 +288,21 @@ class Group (Element):
     def GetTranslation (self):
         return self._translation
 
+    def GetBounds (self):
+        b = geo.BoundingBox ()
+        for e in self._children:
+            b.Merge (e.GetBounds ())
+
+        return geo.BoundingBox (
+            b.GetMinimum () + self._translation,
+            b.GetMaximum () + self._translation
+        )
+
 class Drawing (Element):
-    def __init__(self, width, height, margin = 4):
+    def __init__(self, width = None, height = None, margin = 4):
         '''Create a new drawing.
+
+        If no size is specified, the size will be estimated at the end.
 
         Margin sets a margin around the drawing and thus increases the actual
         size. This is useful if a rectangle is drawn around the whole image;
@@ -255,11 +315,19 @@ class Drawing (Element):
     def Add (self, item):
         self._children.append (item)
 
-    def GetWidth (self):
-        return self._width
+    def GetSize (self):
+        size = None
 
-    def GetHeight (self):
-        return self._height
+        if self._width is None or self._height is None:
+            size = self.GetBounds ().GetSize ()
+
+        if self._width is not None:
+            size [0] = self._width
+
+        if self._height is not None:
+            size [1] = self._size
+
+        return size
 
     def GetMargin (self):
         return self._margin

@@ -81,9 +81,10 @@ class SvgVisitor (Visitor):
 			insert=instance.GetPosition ())
 
 	def Save (self, filename, image):
+		imageSize = image.GetSize ()
 		d = svgwrite.Drawing (filename,
-			size = (image.GetWidth () + image.GetMargin () * 2,
-					image.GetHeight () + image.GetMargin () * 2),
+			size = (imageSize [0] + image.GetMargin () * 2,
+					imageSize [1] + image.GetMargin () * 2),
 			profile = 'full')
 
 		rootItem = self.VisitGeneric (image, d)

@@ -110,16 +110,18 @@ class CairoVisitor (Visitor):
 		return surface
 
 	def SavePng (self, filename, image):
+		imageSize = [int(i) for i in image.GetSize ()]
 		surface = cairo.ImageSurface (cairo.FORMAT_ARGB32,
-			image.GetWidth () + image.GetMargin () * 2,
-			image.GetHeight () + image.GetMargin () * 2)
+			imageSize [0] + image.GetMargin () * 2,
+			imageSize [1] + image.GetMargin () * 2)
 
 		self._Render (image, surface).write_to_png (filename)
 
 	def SavePdf (self, filename, image):
+		imageSize = [int(i) for i in image.GetSize ()]
 		surface = cairo.PDFSurface (filename,
-			image.GetWidth () + image.GetMargin () * 2,
-			image.GetHeight () + image.GetMargin () * 2)
+			imageSize [0] + image.GetMargin () * 2,
+			imageSize [1] + image.GetMargin () * 2)
 
 		self._Render (image, surface)
 
