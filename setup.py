@@ -1,9 +1,9 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name = "Luna",
     version = "0.1.0",
-    packages = ['luna'],
+    packages = find_packages (exclude='test'),
 	test_suite = 'test',
 
     # Project uses reStructuredText, so ensure that the docutils get
@@ -16,7 +16,7 @@ setup(
     description = "2D drawing library",
     license = "BSD",
     keywords = [],
-    url = "http://example.com/HelloWorld/",   # project home page, if any
+    url = "http://shelter13.net/projects/Luna",   # project home page, if any
 
     # could also include long_description, download_url, classifiers, etc.
 )
