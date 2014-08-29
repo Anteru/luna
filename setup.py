@@ -25,7 +25,7 @@ class PyTest(TestCommand):
 setup(
     name = "Luna",
     version = luna.__version__,
-    packages = find_packages (),
+    packages = find_packages (exclude=['*.test', 'test.*', '*.test.*']),
 
     test_suite = 'luna.test',
     tests_require=['pytest'],
@@ -41,5 +41,17 @@ setup(
     url = "http://shelter13.net/projects/Luna",
     extras_require={
 	'testing' : ['pytest']
-    }
+    },
+
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3.4',
+        'Topic :: Multimedia :: Graphics',
+
+    ]
 )
