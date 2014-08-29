@@ -4,23 +4,16 @@ from setuptools.command.test import test as TestCommand
 
 import luna
 
-class PyTest(TestCommand):
-    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
-
-    def initialize_options(self):
-        TestCommand.initialize_options(self)
-        self.pytest_args = ['--strict', 'luna']
-
+class Tox(TestCommand):
     def finalize_options(self):
         TestCommand.finalize_options(self)
         self.test_args = []
         self.test_suite = True
-
     def run_tests(self):
         #import here, cause outside the eggs aren't loaded
-        import pytest
-        errno = pytest.main(self.pytest_args)
-        sys.exit(errno)
+        import tox
+        errcode = tox.cmdline(self.test_args)
+        sys.exit(errcode)
 
 setup(
     name = "Luna",
@@ -28,8 +21,8 @@ setup(
     packages = find_packages (exclude=['*.test', 'test.*', '*.test.*']),
 
     test_suite = 'luna.test',
-    tests_require=['pytest'],
-    cmdclass = {'test' : PyTest},
+    tests_require=['tox'],
+    cmdclass = {'test' : Tox},
 
     install_requires = ['cairocffi>=0.5.4', 'svgwrite>=1.1.6'],
 
@@ -39,9 +32,6 @@ setup(
     license = "BSD",
     keywords = [],
     url = "http://shelter13.net/projects/Luna",
-    extras_require={
-	'testing' : ['pytest']
-    },
 
     classifiers=[
         'Development Status :: 3 - Alpha',
