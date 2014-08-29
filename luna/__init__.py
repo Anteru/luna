@@ -2,6 +2,8 @@ from enum import Enum, unique
 
 from . import geo
 
+__version__ = '0.1.1'
+
 @unique
 class LineCap(Enum):
     Round   = 0
