@@ -36,6 +36,18 @@ class CairoVisitor (Visitor):
 		ctx.line_to (line.GetEnd () [0], line.GetEnd () [1])
 		ctx.stroke ()
 
+	def VisitText (self, text, ctx=None):
+		ctx.set_font_size (text.GetFont ().GetSize ())
+
+		if text.GetFont ().GetFontFace () is not None:
+			ctx.select_font_face (text.GetFont ().GetFontFace (),
+				cairo.FONT_SLANT_NORMAL,
+				cairo.FONT_WEIGHT_NORMAL)
+
+		ctx.move_to (text.GetPosition ().x, text.GetPosition ().y)
+		ctx.show_text (text.GetText ())
+		ctx.new_path ()
+
 	def VisitPolygon (self, polygon, ctx = None):
 		if polygon.GetFill () is None and polygon.GetStroke () is None:
 			return
@@ -146,7 +158,7 @@ class CairoVisitor (Visitor):
 			ctx.set_dash (stroke.GetDashPattern ())
 		else:
 			ctx.set_dash ([])
-			
+
 		ctx.set_source_rgba (
 			stroke.GetColor ().R () / 255,
 			stroke.GetColor ().G () / 255,

@@ -304,6 +304,60 @@ class Group (Element):
             b.GetMaximum () + self._translation
         )
 
+class FontWeight (Enum):
+    Normal = 0
+    Bold = 1
+
+class Font:
+    def __init__ (self, fontFace=None, size=12, weight=FontWeight.Normal):
+        self._size = 12
+        self._weight = weight
+        self._fontFace = fontFace
+
+    def GetSize (self):
+        return self._size
+
+    def GetWeight (self):
+        return self._weight
+
+    def GetFontFace (self):
+        return self._fontFace
+
+class Text (Element):
+    def __init__ (self, text, position, stroke=Stroke(), font=Font ()):
+        super (Text,self).__init__ ()
+        self._text = text
+        self._position = geo.Vector2 (position)
+        self._font = font
+        self._stroke = stroke
+
+    def GetStroke (self):
+        return self._stroke
+
+    def GetPosition (self):
+        return self._position
+
+    def GetText (self):
+        return self._text
+
+    def GetFont (self):
+        return self._font
+
+    def GetBounds (self):
+        # Crude approximation
+        # For correct bounds, the backend must actually process this and employ
+        # proper font metrics
+        lines = self._text.split ('\n')
+
+        width = 0
+        height = 0
+
+        for line in lines:
+            width = max (width, len (line) * self._font.GetSize ())
+            height += self._font.GetSize () * 1.5 # line spacing
+
+        return geo.BoundingBox (self._position, (width, height))
+
 class Drawing (Element):
     def __init__(self, width = None, height = None, margin = 4):
         '''Create a new drawing.

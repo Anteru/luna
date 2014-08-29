@@ -80,6 +80,19 @@ class SvgVisitor (Visitor):
 			circle.GetRadius (),
 			**p)
 
+	def VisitText (self, text, ctx=None):
+		p = dict ()
+
+		style = []
+		if text.GetFont ().GetFontFace () is not None:
+			style.append ('font-face:{};'.format (text.GetFont ().GetFontFace ()))
+
+		style.append ('font-size:{}px;'.format (text.GetFont ().GetSize ()))
+
+		p ['style'] = ''.join (style)
+
+		return ctx.text (text.GetText (), text.GetPosition (), **p)
+
 	def VisitInstance (self, instance, ctx=None):
 		return ctx.use ('#' + instance.GetSource().GetId (),
 			insert=instance.GetPosition ())
