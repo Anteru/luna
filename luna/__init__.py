@@ -304,6 +304,21 @@ class Group (Element):
             b.GetMaximum () + self._translation
         )
 
+class Array (Element):
+    def __init__ (self, element, columns=1, rows=1, offset=(0, 0), spacing=None):
+        super(Array, self).__init__ ()
+        self._element = element
+        self._columns = columns
+        self._rows = rows
+        self._offset = geo.Vector2 (offset)
+        self._spacing = geo.Vector2 (spacing) if spacing else element.GetBounds().GetSize()
+
+        # Instantiate element
+        for row in range (self._rows):
+            for column in range (self._columns):
+                self._children.append (Instance (element, self._offset +
+                    geo.Vector2 (self._spacing.x * column, self._spacing.y * row)))
+
 class FontWeight (Enum):
     Normal = 0
     Bold = 1
