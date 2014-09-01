@@ -2,7 +2,7 @@ from enum import Enum, unique
 
 from . import geo
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 @unique
 class LineCap(Enum):
