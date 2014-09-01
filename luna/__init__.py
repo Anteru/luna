@@ -309,10 +309,13 @@ class FontWeight (Enum):
     Bold = 1
 
 class Font:
-    def __init__ (self, fontFace=None, size=12, weight=FontWeight.Normal):
+    def __init__ (self, fontFace=None, size=12, weight=FontWeight.Normal,
+        stroke=None, fill=Fill()):
         self._size = 12
         self._weight = weight
         self._fontFace = fontFace
+        self._stroke = stroke
+        self._fill = fill
 
     def GetSize (self):
         return self._size
@@ -322,6 +325,12 @@ class Font:
 
     def GetFontFace (self):
         return self._fontFace
+
+    def GetFill (self):
+        return self._fill
+
+    def GetStroke (self):
+        return self._stroke
 
 class Text (Element):
     def __init__ (self, text, position, stroke=Stroke(), font=Font ()):
@@ -353,7 +362,7 @@ class Text (Element):
         height = 0
 
         for line in lines:
-            width = max (width, len (line) * self._font.GetSize ())
+            width = max (width, len (line) * self._font.GetSize () * 0.5)
             height += self._font.GetSize () * 1.5 # line spacing
 
         return geo.BoundingBox (self._position, (width, height))

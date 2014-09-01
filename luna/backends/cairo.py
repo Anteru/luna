@@ -44,6 +44,12 @@ class CairoVisitor (Visitor):
 				cairo.FONT_SLANT_NORMAL,
 				cairo.FONT_WEIGHT_NORMAL)
 
+		if text.GetFont ().GetFill () is not None:
+			self._ApplyFill (text.GetFont ().GetFill (), ctx)
+
+		if text.GetFont ().GetStroke () is not None:
+			self._ApplyStroke (text.GetFont ().GetStroke (), ctx)
+
 		ctx.move_to (text.GetPosition ().x, text.GetPosition ().y)
 		ctx.show_text (text.GetText ())
 		ctx.new_path ()
