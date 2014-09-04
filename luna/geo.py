@@ -62,6 +62,7 @@ class Vector2:
         assert (isinstance (other, Number))
         self.x *= other
         self.y *= other
+        return self
 
     def __mul__ (self, other):
         c = Vector2 (self.x, self.y)

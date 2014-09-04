@@ -7,3 +7,10 @@ def test_Vector2_Add ():
 
 	assert (r.x == 4)
 	assert (r.y == 6)
+
+def test_Vector2_MultiplyScalar ():
+	a = Vector2 (3, 5)
+	b = a * 3
+
+	assert (b.x == 9)
+	assert (b.y == 15)
