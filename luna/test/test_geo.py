@@ -15,6 +15,13 @@ def test_Vector2_MultiplyScalar ():
 	assert (b.x == 9)
 	assert (b.y == 15)
 
+def test_Vector2_DivideScalar ():
+	a = Vector2 (9, 15)
+	b = a / 3
+
+	assert (b.x == 3)
+	assert (b.y == 5)
+
 def test_BoundingBox_FromPoints ():
 	b = BoundingBox.FromPoints ([(5,2), (7, 1), (6, 3)])
 
