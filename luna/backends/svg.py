@@ -99,6 +99,7 @@ class SvgVisitor (Visitor):
 
 	def Save (self, filename, image):
 		imageSize = image.GetSize ()
+		print (imageSize [0], image.GetMargin ())
 		d = svgwrite.Drawing (filename,
 			size = (imageSize [0] + image.GetMargin () * 2,
 					imageSize [1] + image.GetMargin () * 2),

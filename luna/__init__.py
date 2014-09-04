@@ -286,7 +286,7 @@ class Group (Element):
     def __init__(self, translation=(0, 0), name=None):
         super(Group, self).__init__ ()
         self._name = name
-        self._translation = translation
+        self._translation = geo.Vector2 (translation)
 
     def Add (self, item):
         self._children.append (item)
@@ -403,7 +403,7 @@ class Drawing (Element):
         size = geo.Vector2 (0, 0)
 
         if self._width is None or self._height is None:
-            size = self.GetBounds ().GetSize ()
+            size = self.GetBounds ().GetMaximum ()
 
         if self._width is not None:
             size [0] = self._width
