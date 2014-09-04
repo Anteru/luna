@@ -1,4 +1,4 @@
-from luna.geo import Vector2
+from luna.geo import Vector2, BoundingBox
 
 def test_Vector2_Add ():
 	a = Vector2 (1, 2)
@@ -14,3 +14,8 @@ def test_Vector2_MultiplyScalar ():
 
 	assert (b.x == 9)
 	assert (b.y == 15)
+
+def test_BoundingBox_FromPoints ():
+	b = BoundingBox.FromPoints ([(5,2), (7, 1), (6, 3)])
+
+	assert (b.GetSize ().x == 2)

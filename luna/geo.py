@@ -127,7 +127,7 @@ class BoundingBox:
         return self._max
 
     def GetWidth (self):
-        return self._max.x - self._min.y
+        return self._max.x - self._min.x
 
     def GetHeight (self):
         return self._max.y - self._min.y
