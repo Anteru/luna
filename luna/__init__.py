@@ -2,7 +2,7 @@ from enum import Enum, unique
 
 from . import geo
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 @unique
 class LineCap(Enum):
@@ -22,13 +22,17 @@ class DashPattern (Enum):
     Dot = 1
     SparseDash = 2
     DashDot = 3
+    DenseDot = 4
+    SparseDot = 5
 
 def _DashPatternToArray (p):
     m = {
         DashPattern.Dash: [5, 5],
-        DashPattern.Dot: [1, 5],
+        DashPattern.Dot: [0, 3],
         DashPattern.SparseDash: [5, 10],
-        DashPattern.DashDot: [15, 10, 5, 10]
+        DashPattern.DashDot: [15, 10, 0, 10],
+        DashPattern.DenseDot: [0, 1.5],
+        DashPattern.SparseDot: [0, 5]
     }
 
     return m [p]
