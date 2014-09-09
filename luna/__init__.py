@@ -1,8 +1,9 @@
 from enum import Enum, unique
+import copy
 
 from . import geo
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
 @unique
 class LineCap(Enum):
@@ -122,6 +123,9 @@ class Element:
             # We assume this element is referenced from the "outside", as the
             # user has specified a name for it
             self._references = 1
+
+    def Copy (self):
+        return copy.deepcopy (self)
 
     def GetBounds (self):
         bounds = geo.BoundingBox ()
