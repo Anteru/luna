@@ -335,7 +335,7 @@ class FontWeight (Enum):
 class Font:
     def __init__ (self, fontFace=None, size=12, weight=FontWeight.Normal,
         stroke=None, fill=Fill()):
-        self._size = 12
+        self._size = size
         self._weight = weight
         self._fontFace = fontFace
         self._stroke = stroke
