@@ -107,6 +107,17 @@ class CairoVisitor (Visitor):
 
 		ctx.new_path ()
 
+	def VisitImage (self, image, ctx=None):
+		fill = cairo.ImageSurface.create_from_png (image.GetFilename ())
+		w = fill.get_width ()
+		h = fill.get_height ()
+
+		with ctx:
+			ctx.translate (image.GetPosition ().x, image.GetPosition ().y)
+			ctx.scale (image.GetSize ().x / w, image.GetSize ().y / h)
+			ctx.set_source_surface (fill, 0, 0)
+			ctx.paint ()
+
 	def VisitCircle (self, circle, ctx=None):
 		if circle.GetFill () is None and circle.GetStroke () is None:
 			return

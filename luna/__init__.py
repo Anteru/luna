@@ -269,6 +269,29 @@ class Rectangle (Element):
             bounds.Expand (0.5 * self._stroke.GetWidth ())
         return bounds
 
+class Image (Element):
+    def __init__ (self, filename, position, size):
+        super (Image, self).__init__ ()
+        self._position = geo.Vector2 (position)
+        self._filename = filename
+        self._size = geo.Vector2 (size)
+
+    def GetFilename (self):
+        return self._filename
+
+    def GetPosition (self):
+        return self._position
+
+    def GetSize (self):
+        return self._size
+
+    def GetBounds (self):
+        bounds = geo.BoundingBox.FromPoints (
+            [self._position, self._position + self._size]
+        )
+
+        return bounds
+
 class Instance (Element):
     def __init__ (self, source, position):
         super (Instance, self).__init__ ()

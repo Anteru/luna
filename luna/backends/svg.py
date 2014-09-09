@@ -71,6 +71,12 @@ class SvgVisitor (Visitor):
 			rectangle.GetSize (),
 			**p)
 
+	def VisitImage (self, image, ctx=None):
+		p = dict ()
+
+		return ctx.image (image.GetFilename (), image.GetPosition (),
+			image.GetSize (), **p) 
+
 	def VisitCircle (self, circle, ctx=None):
 		p = dict ()
 		p.update (self._SvgStroke (circle.GetStroke ()))
