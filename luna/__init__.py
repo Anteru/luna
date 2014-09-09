@@ -297,6 +297,7 @@ class Group (Element):
         self._translation = geo.Vector2 (translation)
 
     def Add (self, item):
+        assert isinstance(item, Element)
         self._children.append (item)
 
     def GetTranslation (self):
@@ -451,7 +452,7 @@ class Grid (Group):
     def __init__ (self, offset, size, spacing, stroke=Stroke ()):
         super(Grid, self).__init__ ()
         horizontalLine = Line ((offset [0], offset [1]),
-                      (offset [0] + size [0] * spacing, offset [1]),
+                      (offset [0] + size [0] * self._spacing.x, offset [1]),
                       stroke=stroke)
         self._shared.append (horizontalLine)
 
