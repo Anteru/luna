@@ -451,20 +451,26 @@ class Drawing (Element):
 class Grid (Group):
     def __init__ (self, offset, size, spacing, stroke=Stroke ()):
         super(Grid, self).__init__ ()
+
+        if hasattr (spacing, '__len__') and len (spacing) == 2:
+            self._spacing = geo.Vector2 (spacing)
+        else:
+            self._spacing = geo.Vector2 (spacing, spacing)
+
         horizontalLine = Line ((offset [0], offset [1]),
                       (offset [0] + size [0] * self._spacing.x, offset [1]),
                       stroke=stroke)
         self._shared.append (horizontalLine)
 
         for y in range (0, size [1] + 1):
-            self.Add (Instance (horizontalLine, (0, y * spacing)))
+            self.Add (Instance (horizontalLine, (0, y * self._spacing.y)))
 
         verticalLine = Line ((offset [0], offset [1]),
-                             (offset [0], offset [1] + size [1] * spacing),
+                             (offset [0], offset [1] + size [1] * self._spacing.y),
                              stroke=stroke)
         self._shared.append (verticalLine)
         for x in range (0, size [0] + 1):
-            self.Add (Instance (verticalLine, (x * spacing, 0)))
+            self.Add (Instance (verticalLine, (x * self._spacing.x, 0)))
 
 class Cross (Group):
     def __init__ (self, position, size=1, stroke=Stroke()):
