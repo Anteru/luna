@@ -27,6 +27,17 @@ class CairoVisitor (Visitor):
 			ctx.translate (-group.GetTranslation () [0],
 						-group.GetTranslation () [1])
 
+	def VisitPath (self, path, ctx = None):
+		if path.GetStroke () is None:
+			return
+
+		self._ApplyStroke (path.GetStroke (), ctx)
+		ctx.move_to (path.GetPoints () [0].x, path.GetPoints () [0].y)
+
+		for p in path.GetPoints () [1:]:
+			ctx.line_to (p.x, p.y)
+		ctx.stroke ()
+
 	def VisitLine (self, line, ctx = None):
 		if line.GetStroke () is None:
 			return

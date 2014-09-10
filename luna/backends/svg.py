@@ -43,6 +43,13 @@ class SvgVisitor (Visitor):
 						group.GetTranslation () [1])
 		return g
 
+	def VisitPath (self, path, ctx = None):
+		p = dict ()
+		p.update (self._SvgStroke (path.GetStroke ()))
+
+		return ctx.polyline (path.GetPoints (),
+			**p)
+
 	def VisitLine (self, line, ctx = None):
 		p = dict ()
 		p.update (self._SvgStroke (line.GetStroke ()))
@@ -75,7 +82,7 @@ class SvgVisitor (Visitor):
 		p = dict ()
 
 		return ctx.image (image.GetFilename (), image.GetPosition (),
-			image.GetSize (), **p) 
+			image.GetSize (), **p)
 
 	def VisitCircle (self, circle, ctx=None):
 		p = dict ()

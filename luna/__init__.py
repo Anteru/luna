@@ -163,26 +163,32 @@ class Element:
         else:
             self._scale = geo.Vector2 (x, y)
 
-class Line (Element):
-    def __init__ (self, p0, p1, stroke=Stroke ()):
-        super (Line, self).__init__ ()
-        self._p0 = geo.Vector2 (p0)
-        self._p1 = geo.Vector2 (p1)
+class Path (Element):
+    def __init__ (self, points, stroke=Stroke ()):
+        super (Path, self).__init__ ()
+        self._points = [geo.Vector2(p) for p in points]
         self._stroke = stroke
 
-    def GetStart (self):
-        return self._p0
-
-    def GetEnd (self):
-        return self._p1
+    def GetPoints (self):
+        return self._points
 
     def GetStroke (self):
         return self._stroke
 
     def GetBounds (self):
-        bounds = geo.BoundingBox.FromPoints ([self._p0, self._p1])
+        bounds = geo.BoundingBox.FromPoints (self._points)
         bounds.Expand (0.5 * self._stroke.GetWidth ())
         return bounds
+
+class Line (Path):
+    def __init__ (self, p0, p1, stroke=Stroke ()):
+        super (Line, self).__init__ ([p0, p1], stroke)
+
+    def GetStart (self):
+        return self.GetPoints () [0]
+
+    def GetEnd (self):
+        return self.GetPoints () [1]
 
 class Polygon (Element):
     def __init__ (self, points, stroke=Stroke (), fill=Fill ()):
